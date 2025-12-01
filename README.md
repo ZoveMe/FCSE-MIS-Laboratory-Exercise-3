@@ -1,6 +1,6 @@
-# Laboratory Exercise 1: Food Recipes
+# Laboratory Exercise 3: Food Recipes
 
-A simple Flutter app for showing food recipes usign an api from TheMealDB
+A simple Flutter app for showing food recipes usign an api from TheMealDB, integrated with firebase.
 
 ---
 
