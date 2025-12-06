@@ -1,39 +1,68 @@
 import 'package:flutter/material.dart';
 import '../models/category.dart';
+import '../screens/meals_by_category_screen.dart';
 
 class CategoryCard extends StatelessWidget {
   final Category category;
 
-  const CategoryCard({Key? key, required this.category}) : super(key: key);
+  const CategoryCard({super.key, required this.category});
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      elevation: 4,
-      child: ListTile(
-        contentPadding: EdgeInsets.all(12),
-        leading: ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: Image.network(
-            category.strCategoryThumb,
-            width: 64,
-            height: 64,
-            fit: BoxFit.cover,
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => MealsByCategoryScreen(category: category.strCategory),
           ),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.15),
+              blurRadius: 10,
+              offset: const Offset(2, 4),
+            )
+          ],
         ),
-        title: Text(
-          category.strCategory,
-          style: Theme.of(context).textTheme.titleLarge,
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.network(
+                category.strCategoryThumb,
+                width: 70,
+                height: 70,
+                fit: BoxFit.cover,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    category.strCategory,
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    category.strCategoryDescription,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  )
+                ],
+              ),
+            ),
+            const Icon(Icons.arrow_forward_ios, size: 18)
+          ],
         ),
-        subtitle: Text(
-          category.strCategoryDescription,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
-        trailing: Icon(Icons.arrow_forward_ios_rounded, size: 18),
       ),
     );
   }

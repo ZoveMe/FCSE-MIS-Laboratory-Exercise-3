@@ -3,11 +3,13 @@ import '../models/meal_summary.dart';
 import '../services/api_service.dart';
 import '../widgets/meal_grid_item.dart';
 import 'meal_detail_screen.dart';
+import '../widgets/gradient_background.dart';
+
 
 class MealsByCategoryScreen extends StatefulWidget {
   final String category;
 
-  const MealsByCategoryScreen({ Key? key, required this.category }) : super(key: key);
+  const MealsByCategoryScreen({Key? key, required this.category}) : super(key: key);
 
   @override
   _MealsByCategoryScreenState createState() => _MealsByCategoryScreenState();
@@ -18,7 +20,7 @@ class _MealsByCategoryScreenState extends State<MealsByCategoryScreen> {
   List<MealSummary> _meals = [];
   List<MealSummary> _filtered = [];
   bool _loading = true;
-  TextEditingController _searchController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -37,6 +39,7 @@ class _MealsByCategoryScreenState extends State<MealsByCategoryScreen> {
   Future<void> _loadMeals() async {
     try {
       final meals = await _apiService.fetchMealsByCategory(widget.category);
+
       setState(() {
         _meals = meals;
         _filtered = meals;
@@ -44,71 +47,79 @@ class _MealsByCategoryScreenState extends State<MealsByCategoryScreen> {
       });
     } catch (e) {
       print(e);
-      setState(() {
-        _loading = false;
-      });
+      setState(() => _loading = false);
     }
   }
 
-  void _onSearchChanged() {
+  void _onSearchChanged() async {
     final query = _searchController.text;
+
     if (query.isEmpty) {
-      setState(() {
-        _filtered = _meals;
-      });
-    } else {
-      // search via API or local filter
-      _apiService.searchMeals(query).then((results) {
-        // filter only those in this category (if that is relevant)
-        final filteredResults = results.where((m) => m.strMeal.isNotEmpty).toList();
-        setState(() {
-          _filtered = filteredResults;
-        });
-      }).catchError((e) {
-        print(e);
-      });
+      setState(() => _filtered = _meals);
+      return;
+    }
+
+    try {
+      final results = await _apiService.searchMeals(query);
+      setState(() => _filtered = results);
+    } catch (e) {
+      print(e);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        title: Text('Meals: ${widget.category}'),
+        backgroundColor: const Color(0xFF3F5EFB), // Blue header ONLY
+        foregroundColor: Colors.white,
+        title: Text("Meals: ${widget.category}"),
       ),
+
       body: _loading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : Column(
         children: [
+          // SEARCH BAR
           Padding(
-            padding: EdgeInsets.all(8),
+            padding: const EdgeInsets.all(12),
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
                 hintText: 'Search meals...',
-                prefixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(),
+                prefixIcon: const Icon(Icons.search),
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Colors.black12),
+                ),
               ),
             ),
           ),
+
+          // GRID
           Expanded(
             child: GridView.builder(
-              padding: EdgeInsets.all(8),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              padding: const EdgeInsets.all(8),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 childAspectRatio: 0.75,
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 8,
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
               ),
               itemCount: _filtered.length,
-              itemBuilder: (context, index) {
+              itemBuilder: (_, index) {
                 final meal = _filtered[index];
+
                 return GestureDetector(
-                  onTap: () {
+                  onTap: () async {
+                    final detail = await _apiService.fetchMealDetail(meal.idMeal);
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => MealDetailScreen(mealId: meal.idMeal),
+                        builder: (_) => MealDetailScreen(meal: detail),
                       ),
                     );
                   },
@@ -121,4 +132,6 @@ class _MealsByCategoryScreenState extends State<MealsByCategoryScreen> {
       ),
     );
   }
+
+
 }

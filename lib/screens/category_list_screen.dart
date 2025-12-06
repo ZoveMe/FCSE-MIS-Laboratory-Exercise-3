@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import '../models/category.dart';
 import '../services/api_service.dart';
 import '../widgets/category_card.dart';
-import 'meals_by_category_screen.dart';
+import '../widgets/gradient_background.dart';
 import 'meal_detail_screen.dart';
 
 class CategoryListScreen extends StatefulWidget {
+  const CategoryListScreen({super.key});
+
   @override
-  _CategoryListScreenState createState() => _CategoryListScreenState();
+  State<CategoryListScreen> createState() => _CategoryListScreenState();
 }
 
 class _CategoryListScreenState extends State<CategoryListScreen> {
@@ -19,10 +21,10 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
   @override
   void initState() {
     super.initState();
-    _loadCategories();
+    _loadData();
   }
 
-  Future<void> _loadCategories() async {
+  Future<void> _loadData() async {
     try {
       final cats = await _apiService.fetchCategories();
       setState(() {
@@ -31,82 +33,74 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
         _loading = false;
       });
     } catch (e) {
-      print(e);
-      setState(() {
-        _loading = false;
-      });
+      debugPrint(e.toString());
     }
   }
 
-  void _onSearch(String query) {
-    final filt = _categories.where((c) =>
-        c.strCategory.toLowerCase().contains(query.toLowerCase())).toList();
+  void _onSearch(String text) {
+    final q = text.toLowerCase();
     setState(() {
-      _filtered = filt;
+      _filtered = _categories
+          .where((c) => c.strCategory.toLowerCase().contains(q))
+          .toList();
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      /// App bar is SOLID BLUE like GitHub version
       appBar: AppBar(
-        title: Text('Categories'),
+        title: const Text("Categories"),
+        backgroundColor: const Color(0xFF3F5EFB),
+        elevation: 0,
         actions: [
           IconButton(
-            icon: Icon(Icons.shuffle),
+            icon: const Icon(Icons.shuffle),
             onPressed: () async {
               final randomMeal = await _apiService.fetchRandomMeal();
+              final detail =
+              await _apiService.fetchMealDetail(randomMeal.idMeal);
+
               Navigator.push(
                 context,
-                PageRouteBuilder(
-                  pageBuilder: (_, __, ___) => MealDetailScreen(mealDetail: randomMeal),
-                  transitionsBuilder: (_, animation, __, child) {
-                    return FadeTransition(opacity: animation, child: child);
-                  },
+                MaterialPageRoute(
+                  builder: (_) => MealDetailScreen(meal: detail),
                 ),
               );
             },
           )
         ],
       ),
-      body: _loading
-          ? Center(child: CircularProgressIndicator())
-          : Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: ' Search categories...',
-                prefixIcon: Icon(Icons.search),
+
+      /// BODY gets the gradient – NOT the AppBar and NOT the whole Scaffold
+      body: GradientBackground(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: TextField(
+                onChanged: _onSearch,
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.white,
+                  hintText: "Search categories...",
+                  prefixIcon: const Icon(Icons.search),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
               ),
-              onChanged: _onSearch,
             ),
-          ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: _filtered.length,
-              itemBuilder: (context, index) {
-                final cat = _filtered[index];
-                return GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      PageRouteBuilder(
-                        pageBuilder: (_, __, ___) =>
-                            MealsByCategoryScreen(category: cat.strCategory),
-                        transitionsBuilder: (_, animation, __, child) {
-                          return FadeTransition(opacity: animation, child: child);
-                        },
-                      ),
-                    );
-                  },
-                  child: CategoryCard(category: cat),
-                );
-              },
+
+            Expanded(
+              child: ListView.builder(
+                itemCount: _filtered.length,
+                itemBuilder: (_, i) => CategoryCard(category: _filtered[i]),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
