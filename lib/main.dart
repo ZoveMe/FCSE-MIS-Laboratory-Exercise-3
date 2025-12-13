@@ -38,7 +38,7 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     _analytics = FirebaseAnalytics.instance;
-    _analytics.logAppOpen(); // 🔥 THIS IS CRITICAL
+    _analytics.logAppOpen();
     _setupFirebaseNotifications();
   }
 
