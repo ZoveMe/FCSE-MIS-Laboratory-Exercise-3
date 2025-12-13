@@ -9,7 +9,7 @@ class MealDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF111111), // 🔥 Dark grey (border visible)
+      backgroundColor: const Color(0xFF111111),
 
       appBar: AppBar(
         backgroundColor: const Color(0xFF111111),
@@ -29,7 +29,7 @@ class MealDetailScreen extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(16),
 
-          // 🔥 THE BORDER NOW SHOWS!
+
           decoration: BoxDecoration(
             color: Colors.black.withOpacity(0.25),
             borderRadius: BorderRadius.circular(20),

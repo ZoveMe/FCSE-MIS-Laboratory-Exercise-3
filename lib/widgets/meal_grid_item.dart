@@ -15,7 +15,7 @@ class MealGridItem extends StatelessWidget {
       tag: meal.idMeal,
       child: Stack(
         children: [
-          // Main Card
+
           Card(
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16)),
@@ -54,7 +54,7 @@ class MealGridItem extends StatelessWidget {
             child: InkWell(
               onTap: () {
                 FavoriteManager.toggleFavorite(meal);
-                // Force rebuild of parent screen
+
                 (context as Element).markNeedsBuild();
               },
               child: Icon(

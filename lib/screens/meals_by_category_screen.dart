@@ -63,7 +63,7 @@ class _MealsByCategoryScreenState extends State<MealsByCategoryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black, // ⭐ black grid background
+      backgroundColor: Colors.black,
 
       appBar: AppBar(
         title: Text('Meals: ${widget.category}'),
