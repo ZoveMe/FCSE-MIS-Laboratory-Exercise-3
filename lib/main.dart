@@ -6,6 +6,8 @@ import 'screens/category_list_screen.dart';
 import 'screens/favorites_screen.dart';
 import 'services/firebase_service.dart';
 import 'firebase_options.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,10 +33,12 @@ class _MyAppState extends State<MyApp> {
     const CategoryListScreen(),
     const FavoritesScreen(),
   ];
-
+  late FirebaseAnalytics _analytics;
   @override
   void initState() {
     super.initState();
+    _analytics = FirebaseAnalytics.instance;
+    _analytics.logAppOpen(); // 🔥 THIS IS CRITICAL
     _setupFirebaseNotifications();
   }
 
